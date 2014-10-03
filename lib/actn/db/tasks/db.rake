@@ -76,15 +76,19 @@ namespace :db do
   task :drop  do
     puts "Db Dropping... #{db_config[:dbname]}"        
     pg = PG::EM::Client.new(pg_config)
-    sql = "DROP DATABASE IF EXISTS \"%s\";" % [db_config[:dbname]]
+    # sql = "DROP DATABASE IF EXISTS \"%s\";" % [db_config[:dbname]]
+    sql = "drop schema public cascade;"
     pg.exec(sql).error_message
+    sql = "drop schema if exists core cascade;"
+    pg.exec(sql).error_message    
   end
 
   desc 'Creates the database'
   task :create do         
     puts "Db Creating... #{db_config[:dbname]}"            
     pg = PG::EM::Client.new(pg_config)
-    sql = "CREATE DATABASE \"%s\" ENCODING = 'utf8';" % [db_config[:dbname]]
+    # sql = "CREATE DATABASE \"%s\" ENCODING = 'utf8';" % [db_config[:dbname]]
+    sql = "create schema public;"
     pg.exec(sql)
   end
   
@@ -93,7 +97,8 @@ namespace :db do
   end
   
   def pg_config
-    @pg_config ||= db_config.dup.merge({'dbname' => 'postgres'})
+    db_config
+    # @pg_config ||= db_config.dup.merge({'dbname' => 'postgres'})
   end
 
 end
