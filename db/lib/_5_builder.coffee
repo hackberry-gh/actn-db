@@ -1,12 +1,12 @@
 class Builder
-  
+
   constructor: (@schema_name, @table_name, @search_path, @query) ->
     @query.select ?= "*"
     @params = []
     @i = 0
-  
+
   qm: -> "$#{@i += 1}"
-  
+
   make_select: ->
     if @query?.select?.indexOf('COUNT') > -1
       @query.select
@@ -16,8 +16,8 @@ class Builder
       else  
         @params.push _.flatten([@query.select]).join(".")
         "__select(data, #{@qm()}) as data" #::text
-  
-  
+
+
   make_where: (q, join_by = 'AND') ->
     sql = []
     for k, subquery of q
@@ -47,7 +47,7 @@ class Builder
 
     sql.join "\n#{join_by} "
 
-  
+
   make_order_by: () ->
     ord = @query.order_by
     str = []
@@ -62,8 +62,8 @@ class Builder
       @params.push ord
       str.push @qm()
     str.join(",")  
-  
-  
+
+
   make_limit: ->
     @params.push @query.limit
     @qm()
@@ -72,7 +72,7 @@ class Builder
   make_offset: ->
     @params.push @query.offset
     @qm()
-    
+  
 
   build_select: ->
     sql = []
@@ -91,9 +91,9 @@ class Builder
     sql.push "WHERE #{@make_where(@query.where)}" unless _.isEmpty(@query.where)
     sql.push "RETURNING data::json;"
     [sql.join("\n"), @params]
-    
+  
   build_update: (data, merge = true) ->
-    
+  
     @params.push data
     @params.push merge
     sql = []
@@ -102,7 +102,7 @@ class Builder
     sql.push "WHERE #{@make_where(@query.where)}" unless _.isEmpty(@query.where)
     sql.push "RETURNING data::json;"    
     [sql.join("\n"), @params]  
-  
+
   build_insert: (data, merge = true) ->
     @params.push data
     @params.push merge
@@ -115,7 +115,7 @@ class Builder
   plv8_key: (value) -> "#{@typecast(value,true)}(data, #{@qm()}::text)" #::text
 
   plv8_qm: (value) -> "#{@qm()}::#{@typecast(value)}"
-    
+  
   typecast: (value, is_func = false) ->
     type = if is_func then "__" else ""
     if _.isBoolean(value)
@@ -133,4 +133,5 @@ class Builder
     type
 
 
-actn.Builder = Builder
+
+global.actn.Builder = Builder

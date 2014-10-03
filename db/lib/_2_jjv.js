@@ -734,6 +734,5 @@
     define(function () {return Environment;});
   else
     this.jjv = Environment;
+  
 }).call(this);
-
-global.actn.jjv = jjv();

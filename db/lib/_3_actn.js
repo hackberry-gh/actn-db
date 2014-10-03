@@ -20,4 +20,6 @@ var Actn = (function() {
 
 })();
 
-actn = new Actn();
+global.actn = new Actn();
+
+global.actn.jjv = jjv();

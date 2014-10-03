@@ -24,7 +24,7 @@ namespace :db do
       pg.exec(File.read("#{path}/db/__setup.sql")) if File.exists?("#{path}/db/__setup.sql")
 
       if File.exists?("#{path}/db/lib")
-       `coffee --compile --output #{path}/db/lib #{path}/db/lib` rescue nil        
+       `coffee --bare --compile --output #{path}/db/lib #{path}/db/lib` rescue nil        
        
         Dir.glob("#{path}/db/lib/*.js").each do |js|
           name = File.basename(js,".js").split("_").last
