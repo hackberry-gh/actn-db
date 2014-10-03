@@ -20,4 +20,4 @@ var Actn = (function() {
 
 })();
 
-global.actn = new Actn();
+actn = new Actn();

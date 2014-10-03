@@ -213,6 +213,6 @@
 
   })();
 
-  global.actn.Builder = Builder;
+  actn.Builder = Builder;
 
 }).call(this);
