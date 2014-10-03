@@ -1,25 +1,31 @@
-global = (function() {
-  return this;
-}).call(null);
+// global = (function() {
+//   return this;
+// }).call(null);
 
-var Actn = (function() {
-  function Actn() {}
+(function(){
+  
+  var root = this,
+  
+  Actn = (function() {
+    function Actn() {}
 
-  Actn.prototype.valueAt = function(data, key) {
-    var i, keys;
-    keys = key.split(".");
-    for (i in keys) {
-      if (data != null) {
-        data = data[keys[i]];
+    Actn.prototype.valueAt = function(data, key) {
+      var i, keys;
+      keys = key.split(".");
+      for (i in keys) {
+        if (data != null) {
+          data = data[keys[i]];
+        }
       }
-    }
-    return data;
-  };
+      return data;
+    };
 
-  return Actn;
+    return Actn;
 
-})();
+  })();
 
-global.actn = new Actn();
+  root.actn = new Actn();
 
-global.actn.jjv = jjv();
+  root.actn.jjv = jjv();
+
+}).call(this);

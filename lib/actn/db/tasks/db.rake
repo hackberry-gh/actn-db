@@ -27,11 +27,14 @@ namespace :db do
        `coffee --bare --compile --output #{path}/db/lib #{path}/db/lib` rescue nil        
        
         Dir.glob("#{path}/db/lib/*.js").each do |js|
-          name = File.basename(js,".js").split("_").last
+          # name = File.basename(js,".js").split("_").last
+          name = File.basename(js,".js")[1..-1]
           sql = "INSERT INTO plv8_modules values ($1,true,$2)"
           pg.exec_params(sql,[name,File.read(js)])
         end  
       end
+      
+      pg.exec "SELECT plv8_startup();"
       
       pg.exec(File.read("#{path}/db/__functions.sql")) if File.exists?("#{path}/db/__functions.sql")      
       
@@ -60,7 +63,7 @@ namespace :db do
           puts "#{name} inserted:#{inserted} updated:#{updated}"  
         end   
         
-        pg.exec "SELECT plv8_startup();"
+
         
       end
       
