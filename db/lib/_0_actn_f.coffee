@@ -359,7 +359,7 @@ class Funcs
       res = upsert_func "core", "jobs", JSON.stringify(job)
       plv8.execute "SELECT pg_notify('jobs', $1);", [res]      
 
-  jobs_model_callbacks: ()TG_TABLE_NAME, TG_OP, NEW, OLD ->
+  jobs_model_callbacks: (TG_TABLE_NAME, TG_OP, NEW, OLD) ->
     table_name = (NEW?.data?.name or OLD?.data?.name).tableize()
   
     table_schema = (NEW?.data?.table_schema or OLD?.data?.table_schema) or "public"
