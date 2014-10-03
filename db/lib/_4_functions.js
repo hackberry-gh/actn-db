@@ -287,7 +287,6 @@
       model = JSON.parse(model);
       if ((model != null ? model.schema : void 0) != null) {
         errors = actn.jjv.validate(model.schema, data);
-        plv8.elog(NOTICE, "VALVAL", JSON.stringify(model.schema));
         if ((data.uuid != null) && (model.schema.readonly_attributes != null)) {
           data = _.omit(data, model.schema.readonly_attributes);
         } else if (model.schema.unique_attributes != null) {

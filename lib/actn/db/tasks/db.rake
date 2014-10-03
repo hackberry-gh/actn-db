@@ -4,8 +4,8 @@ namespace :db do
 
   desc "erases and rewinds all dbs"
   task :reset do
-    Rake::Task["db:drop"].execute 
-    Rake::Task["db:create"].execute 
+    Rake::Task["db:drop_schema"].execute 
+    Rake::Task["db:create_schema"].execute 
     Rake::Task["db:migrate"].execute 
   end
   
@@ -14,8 +14,6 @@ namespace :db do
     
     puts "Db Migrating... #{db_config[:dbname]}"        
     pg = PG::EM::Client.new(db_config)
-    
-
           
     Actn::DB.paths.uniq.each do |path|
       
@@ -62,33 +60,41 @@ namespace :db do
           
           puts "#{name} inserted:#{inserted} updated:#{updated}"  
         end   
-        
-
-        
+  
       end
-      
       
     end    
 
+  end
+  
+  desc 'Drops all schemas'
+  task :drop_schema  do
+    puts "Db Dropping... #{db_config[:dbname]}"        
+    pg = PG::EM::Client.new(db_config)
+    pg.exec "drop schema public cascade;"
+    pg.exec "drop schema if exists core cascade;"  
+  end
+
+  desc 'Creates public schema'
+  task :create_schema do         
+    puts "Db Creating... #{db_config[:dbname]}"            
+    pg = PG::EM::Client.new(db_config)
+    pg.exec "create schema public;"
   end
 
   desc 'Drops the database'
   task :drop  do
     puts "Db Dropping... #{db_config[:dbname]}"        
     pg = PG::EM::Client.new(pg_config)
-    # sql = "DROP DATABASE IF EXISTS \"%s\";" % [db_config[:dbname]]
-    sql = "drop schema public cascade;"
-    pg.exec(sql).error_message
-    sql = "drop schema if exists core cascade;"
-    pg.exec(sql).error_message    
+    sql = "DROP DATABASE IF EXISTS \"%s\";" % [db_config[:dbname]]
+    pg.exec(sql)
   end
 
   desc 'Creates the database'
   task :create do         
     puts "Db Creating... #{db_config[:dbname]}"            
     pg = PG::EM::Client.new(pg_config)
-    # sql = "CREATE DATABASE \"%s\" ENCODING = 'utf8';" % [db_config[:dbname]]
-    sql = "create schema public;"
+    sql = "CREATE DATABASE \"%s\" ENCODING = 'utf8';" % [db_config[:dbname]]
     pg.exec(sql)
   end
   
@@ -97,8 +103,7 @@ namespace :db do
   end
   
   def pg_config
-    db_config
-    # @pg_config ||= db_config.dup.merge({'dbname' => 'postgres'})
+    @pg_config ||= db_config.dup.merge({'dbname' => 'postgres'})
   end
 
 end

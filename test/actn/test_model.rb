@@ -34,7 +34,7 @@ module Actn
         assert_equal "ModelName", model.name
 
         samenamedmodel =  Model.create(data)
-        puts samenamedmodel.errors.inspect
+        # puts samenamedmodel.errors.inspect
         refute samenamedmodel.persisted?
 
         model.destroy

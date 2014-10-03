@@ -254,7 +254,7 @@
     
         errors = actn.jjv.validate(model.schema,data)
   
-        plv8.elog(NOTICE,"VALVAL",JSON.stringify(model.schema))
+        # plv8.elog(NOTICE,"VALVAL",JSON.stringify(model.schema))
   
         if data.uuid? and model.schema.readonly_attributes?
     
