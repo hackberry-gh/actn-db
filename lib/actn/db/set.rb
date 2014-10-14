@@ -21,6 +21,7 @@ module Actn
         self.schema = schema
       end
 
+      # where(:not => { active: :true }, :or => { name: { :== => 'Igor'}, age: { :>= => 20 } })
       
       [:query,:upsert, :update, :delete].each do |meth|
         class_eval <<-CODE

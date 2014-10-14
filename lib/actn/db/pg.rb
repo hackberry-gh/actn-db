@@ -64,7 +64,7 @@ module Actn
       
       def db_config
         @@config ||= begin
-          db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost')
+          db = URI.parse(ENV['DATABASE_URL'])
           config = {
             dbname: db.path[1..-1],
             host: db.host,

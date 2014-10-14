@@ -2,17 +2,17 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "type": "object",
   "properties": {
-    "uuid": {
-      "id": "#uuid",
-      "description": "Universal accessible name of the model, cannot be change after created"
+    "table_schema":{
+      "id": "#table_schema",
+      "type": "string"
     },
     "name": {
       "id": "#name",
-      "description": "Universal accessible name of the model, cannot be change after created",
       "type": "string"
     },
     "schema": { 
-      "id": "#schema"
+      "id": "#schema",
+      "type": "object"      
     },
     "indexes" : {
       "id": "#indexes",      
@@ -44,8 +44,8 @@
       }
     }
   },
-  "required": ["name"],
-  "readonly_attributes": ["name"],
+  "required": ["name","schema","table_schema"],
+  "readonly_attributes": ["name","table_schema"],
   "unique_attributes": ["name"],
   "definitions": {
     "hook":{
