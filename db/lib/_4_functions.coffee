@@ -264,6 +264,7 @@
 
     
         else if model.schema.unique_attributes?
+          # plv8.elog(NOTICE,"MODELDEMOL",JSON.stringify(model))
     
           _schema = if _name is "Model" then "core" else "public"
           _table = model.name.tableize()    

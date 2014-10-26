@@ -11,6 +11,6 @@ class ::String
   def to_domain
     return self unless self.start_with?("http")
     # self.match(/[http|http]:\/\/(\w*:\d*|\w*)\/?/)[1] rescue nil
-    URI[self].host
+    URI(self).host
   end
 end

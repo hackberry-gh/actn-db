@@ -7,6 +7,14 @@ module Actn
     class TestModel < MiniTest::Test
 
 
+      def teardown
+        Model.delete(name: "ModelName")
+      end
+      
+      def setup
+        Model.delete(name: "ModelName")
+      end      
+
       def test_validation
         model = Model.create()
         # puts model.inspect
@@ -16,13 +24,14 @@ module Actn
       end
       
       def test_model_with_full_schema
-        json = '{"name":"ModelName","schema":{"title":"Model Name","type":"object","properties":{"firstName":{"type":"string"},"lastName":{"type":"string"},"age":{"description":"Age in years","type":"integer","minimum":0}},"required":["firstName","lastName"]},"indexes":[{"cols":{"apikey":"text"},"unique":true}],"hooks":{"after_create":[{"name":"Trace"},{"name":"Trace"}]}}'
+        json = '{"table_schema":"public","name":"ModelName","schema":{"title":"Model Name","type":"object","properties":{"firstName":{"type":"string"},"lastName":{"type":"string"},"age":{"description":"Age in years","type":"integer","minimum":0}},"required":["firstName","lastName"]},"indexes":[{"cols":{"apikey":"text"},"unique":true}],"hooks":{"after_create":[{"name":"Trace"},{"name":"Trace"}]}}'
         data  = Oj.load(json)
 
         model = Model.create(data)
         # puts "----"
         # puts model.inspect
         # puts "----"
+        puts model.errors.inspect
         assert model.persisted?
 
         assert_match /0/, Set['ModelName'.tableize].count
