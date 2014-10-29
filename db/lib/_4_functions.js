@@ -74,7 +74,7 @@
       changes = _value;
       isObject = false;
       sync = _sync != null ? _sync : true;
-      defaults = _.pick(data, _.keys(JSON.parse(plv8.find_function('__defaults')())));
+      defaults = _.pick(data, _.keys(JSON.parse(this.__defaults())));
       for (k in changes) {
         if (data.hasOwnProperty(k)) {
           isObject = typeof data[k] === "object" && typeof changes[k] === "object";
@@ -137,7 +137,7 @@
 
     Funcs.prototype.__defaults = function() {
       var timestamp, uuid;
-      uuid = JSON.parse(plv8.find_function('__uuid')());
+      uuid = JSON.parse(this.__uuid());
       timestamp = new Date();
       return JSON.stringify({
         uuid: uuid.uuid,
@@ -281,7 +281,7 @@
     Funcs.prototype.__validate = function(_name, _data) {
       var data, errors, found, model, uniq_attr, where, __query, _base, _i, _len, _ref, _schema, _table;
       data = _data;
-      if (!(model = plv8.find_function('__find_model')(_name))) {
+      if (!(model = this.__find_model(_name))) {
         return data;
       }
       model = JSON.parse(model);
@@ -292,7 +292,7 @@
         } else if (model.schema.unique_attributes != null) {
           _schema = _name === "Model" ? "core" : "public";
           _table = model.name.tableize();
-          __query = plv8.find_function("__query");
+          __query = this.__query;
           _ref = model.schema.unique_attributes || [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             uniq_attr = _ref[_i];
@@ -353,19 +353,17 @@
       };
       switch (TG_OP) {
         case "INSERT":
-          plv8.execute("SELECT __create_table($1,$2)", [table_schema, table_name]);
-          plv8.execute("SELECT __create_index($1,$2,$3)", [
-            table_schema, table_name, {
-              cols: {
-                path: "text"
-              }
+          this.__create_table(table_schema, table_name);
+          this.__create_index(table_schema, table_name, {
+            cols: {
+              path: "text"
             }
-          ]);
+          });
           _ref6 = (NEW != null ? (_ref5 = NEW.data) != null ? _ref5.indexes : void 0 : void 0) || [];
           _results = [];
           for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
             indopts = _ref6[_i];
-            _results.push(plv8.execute("SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]));
+            _results.push(this.__create_index(table_schema, table_name, indopts));
           }
           return _results;
           break;
@@ -373,13 +371,13 @@
           diff = _.reject(OLD != null ? (_ref7 = OLD.data) != null ? _ref7.indexes : void 0 : void 0, differ(NEW));
           for (_j = 0, _len1 = diff.length; _j < _len1; _j++) {
             indopts = diff[_j];
-            plv8.execute("SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]);
+            this.__drop_index(table_schema, table_name, indopts);
           }
           diff = _.reject(NEW != null ? (_ref8 = NEW.data) != null ? _ref8.indexes : void 0 : void 0, differ(OLD));
           _results1 = [];
           for (_k = 0, _len2 = diff.length; _k < _len2; _k++) {
             indopts = diff[_k];
-            _results1.push(plv8.execute("SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]));
+            _results1.push(this.__create_index(table_schema, table_name, indopts));
           }
           return _results1;
           break;
@@ -387,9 +385,9 @@
           _ref10 = (typeof Old !== "undefined" && Old !== null ? (_ref9 = Old.data) != null ? _ref9.indexes : void 0 : void 0) || [];
           for (_l = 0, _len3 = _ref10.length; _l < _len3; _l++) {
             indopts = _ref10[_l];
-            plv8.execute("SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]);
+            this.__drop_index(table_schema, table_name, indopts);
           }
-          return plv8.execute("SELECT __drop_table($1,$2)", [table_schema, table_name]);
+          return this.__drop_table(table_schema, table_name);
       }
     };
 

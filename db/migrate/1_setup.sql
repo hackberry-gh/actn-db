@@ -7,8 +7,9 @@ CREATE EXTENSION IF NOT EXISTS "plv8";
 
 
 -- Js Libs
+DROP TABLE IF EXISTS public.plv8_modules;
 
-CREATE TABLE plv8_modules(modname text primary key, load_on_start boolean, code text);
+CREATE TABLE plv8_modules(name text primary key, code text);
 
 CREATE OR REPLACE FUNCTION plv8_startup() RETURNS void AS $$
   
@@ -16,7 +17,7 @@ CREATE OR REPLACE FUNCTION plv8_startup() RETURNS void AS $$
 
   code = "";
   
-  rows = plv8.execute("SELECT modname, code from public.plv8_modules order by modname");
+  rows = plv8.execute("SELECT name, code FROM public.plv8_modules ORDER BY name");
 
   r = 0;
 

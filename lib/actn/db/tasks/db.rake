@@ -17,34 +17,47 @@ namespace :db do
           
     Actn::DB.paths.uniq.each do |path|
       
-      puts path
+      # where are we?
+      puts "Migration running on: #{path}"
 
-      pg.exec(File.read("#{path}/db/__setup.sql")) if File.exists?("#{path}/db/__setup.sql")
+      # run setup if exists
+      setup_sql = "#{path}/db/migrate/1_setup.sql"
+      if File.exists?(setup_sql)
+        puts "Running SQL File: #{setup_sql}"
+        pg.exec(File.read(setup_sql)) 
+      end
 
+      # load js/coffee libs
       if File.exists?("#{path}/db/lib")
-       `coffee --bare --compile --output #{path}/db/lib #{path}/db/lib` rescue nil        
+       `coffee --bare --compile --output #{path}/db/lib #{path}/db/lib` #rescue nil        
        
         Dir.glob("#{path}/db/lib/*.js").each do |js|
           # name = File.basename(js,".js").split("_").last
           name = File.basename(js,".js")[1..-1]
-          sql = "INSERT INTO plv8_modules values ($1,true,$2)"
+          sql = "INSERT INTO plv8_modules values ($1,$2)"
           pg.exec_params(sql,[name,File.read(js)])
         end  
       end
       
+      # make them available
       pg.exec "SELECT plv8_startup();"
       
-      pg.exec(File.read("#{path}/db/__functions.sql")) if File.exists?("#{path}/db/__functions.sql")      
+      # install functions
+      # func_sql = "#{path}/db/migrate/2_functions.sql"
+      # pg.exec(File.read(func_sql)) if File.exists?(func_sql)
       
-      if File.exists?("#{path}/db/")
-        Dir.glob("#{path}/db/*.sql").each do |sql|
-          unless File.basename(sql,".sql").start_with? "__"
-            puts sql
-            pg.exec(File.read(sql)) 
-          end
+      if File.exists?("#{path}/db/migrate")
+        Dir.glob("#{path}/db/migrate/*.sql").sort.each do |sql|
+          # setup sql already executed, skip it
+          next if sql == setup_sql
+          
+          puts "Running SQL File: #{sql}"
+          pg.exec(File.read(sql)) 
+
         end   
       end
       
+      # pre load json schemas of core models
       if File.exists?("#{path}/db/schemas")
         Dir.glob("#{path}/db/schemas/*.json").each do |json|
           name = File.basename(json,".json").capitalize

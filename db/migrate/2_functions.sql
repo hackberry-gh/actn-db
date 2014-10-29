@@ -2,7 +2,7 @@
 
 CREATE or REPLACE FUNCTION __json(_data json, _key text) RETURNS JSON AS $$
   return actn.funcs.__json(_data, _key);
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 
 
@@ -42,57 +42,57 @@ $$ LANGUAGE plv8 IMMUTABLE STRICT;
 
 
 
-CREATE or REPLACE FUNCTION __patch(_data json, _value json, _sync boolean) RETURNS JSON AS $$
-  return actn.funcs.__patch(_data, _value, _sync);
-$$ LANGUAGE plv8 STABLE STRICT;
-
-
-
 CREATE or REPLACE FUNCTION __select(_data json, _fields text) RETURNS JSON AS $$
   return actn.funcs.__select(_data, _fields); 
 $$ LANGUAGE plv8 STABLE STRICT;
 
 
 
+CREATE or REPLACE FUNCTION __patch(_data json, _value json, _sync boolean) RETURNS JSON AS $$
+  return actn.funcs.__patch(_data, _value, _sync);
+$$ LANGUAGE plv8 VOLATILE STRICT;
+
+
+
 CREATE or REPLACE FUNCTION __push(_data json, _key text, _value json) RETURNS JSON AS $$
   return actn.funcs.__push(_data, _key, _value);
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __uuid() RETURNS JSON AS $$
   return actn.funcs.__uuid();  
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __defaults() RETURNS JSON AS $$
   return actn.funcs.__defaults();
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __create_table(schema_name text, table_name text) RETURNS JSON AS $$
   return actn.funcs.__create_table(schema_name, table_name);  
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __drop_table(schema_name text, table_name text) RETURNS JSON AS $$
   return actn.funcs.__drop_table(schema_name, table_name); 
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __create_index(schema_name text, table_name text, optns json) RETURNS JSON AS $$
   return actn.funcs.__create_index(schema_name, table_name, optns);
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
 CREATE or REPLACE FUNCTION __drop_index(schema_name text, table_name text, optns json) RETURNS JSON AS $$
   return actn.funcs.__drop_index(schema_name, table_name, optns);  
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
@@ -102,7 +102,7 @@ $$ LANGUAGE plv8 STABLE STRICT;
 
 CREATE or REPLACE FUNCTION __query(_schema_name text, _table_name text, _query json) RETURNS json AS $$
   return actn.funcs.__query(_schema_name, _table_name, _query);
-$$ LANGUAGE plv8 STABLE;
+$$ LANGUAGE plv8 STABLE STRICT;
 
 
 
@@ -112,7 +112,7 @@ $$ LANGUAGE plv8 STABLE;
 
 CREATE or REPLACE FUNCTION __upsert(_schema_name text, _table_name text, _data json) RETURNS json AS $$
   return actn.funcs.__upsert(_schema_name, _table_name, _data); 
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
@@ -122,7 +122,7 @@ $$ LANGUAGE plv8 STABLE STRICT;
 
 CREATE or REPLACE FUNCTION __update(_schema_name text, _table_name text, _data json, _cond json) RETURNS json AS $$
   return actn.funcs.__update(_schema_name, _table_name, _data, _cond);   
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
@@ -132,7 +132,7 @@ $$ LANGUAGE plv8 STABLE STRICT;
 
 CREATE or REPLACE FUNCTION __delete(_schema_name text, _table_name text, _cond json) RETURNS json AS $$
   return actn.funcs.__delete(_schema_name, _table_name, _cond);     
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
@@ -142,7 +142,7 @@ $$ LANGUAGE plv8 STABLE STRICT;
 
 CREATE or REPLACE FUNCTION __validate(_name text, _data json) RETURNS json AS $$
   return actn.funcs.__validate(_name, _data);    
-$$ LANGUAGE plv8 STABLE STRICT;
+$$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 

@@ -46,7 +46,8 @@
 
       sync = if _sync? then _sync else true
 
-      defaults = _.pick( data, _.keys( JSON.parse( plv8.find_function('__defaults')() ) ) )
+      # defaults = _.pick( data, _.keys( JSON.parse( plv8.find_function('__defaults')() ) ) )
+      defaults = _.pick( data, _.keys( JSON.parse( @__defaults() ) ) )      
 
       for k of changes
         if data.hasOwnProperty(k)
@@ -96,7 +97,7 @@
       return JSON.stringify(ary[0])  
   
     __defaults: () ->
-      uuid = JSON.parse(plv8.find_function('__uuid')())
+      uuid = JSON.parse @__uuid() #JSON.parse(plv8.find_function('__uuid')())
       timestamp = new Date()  
       return JSON.stringify({uuid: uuid.uuid, created_at: timestamp, updated_at: timestamp})  
   
@@ -163,7 +164,6 @@
         result = _.pluck(rows,'data')
       else
         result = rows
-
 
       return JSON.stringify(result)   
 
@@ -244,7 +244,7 @@
 
       # plv8.elog(NOTICE,"__VALIDATE",_name,JSON.stringify(_data))
 
-      return data unless model = plv8.find_function('__find_model')(_name)
+      return data unless model = @__find_model(_name) #plv8.find_function('__find_model')(_name)
 
       model = JSON.parse(model)
 
@@ -268,7 +268,7 @@
     
           _schema = if _name is "Model" then "core" else "public"
           _table = model.name.tableize()    
-          __query = plv8.find_function("__query")
+          __query = @__query #plv8.find_function("__query")
     
           for uniq_attr in model.schema.unique_attributes or []
             if data[uniq_attr]?
@@ -314,29 +314,36 @@
 
       switch TG_OP
         when "INSERT"
-          plv8.execute "SELECT __create_table($1,$2)",[table_schema , table_name]
+          #plv8.execute "SELECT __create_table($1,$2)",[table_schema , table_name]
+          @__create_table table_schema, table_name
     
-          plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, {cols: {path: "text" }}]
-    
+          #plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, {cols: {path: "text" }}]
+          @__create_index table_schema, table_name, {cols: {path: "text" }}
+          
           for indopts in NEW?.data?.indexes or []
-            plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]
+            #plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]
+            @__create_index table_schema, table_name, indopts
       
         when "UPDATE"
       
           diff  = _.reject( OLD?.data?.indexes, differ(NEW) )
     
           for indopts in diff
-            plv8.execute "SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]
+            #plv8.execute "SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]
+            @__drop_index table_schema, table_name, indopts
       
           diff  = _.reject( NEW?.data?.indexes, differ(OLD) )
     
           for indopts in diff
-            plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]
+            #plv8.execute "SELECT __create_index($1,$2,$3)", [table_schema, table_name, indopts]
+            @__create_index table_schema, table_name, indopts
       
         when "DELETE"
           for indopts in Old?.data?.indexes or []
-            plv8.execute "SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]
-          plv8.execute "SELECT __drop_table($1,$2)",[table_schema , table_name]  
+            #plv8.execute "SELECT __drop_index($1,$2,$3)", [table_schema, table_name, indopts]
+            @__drop_index table_schema, table_name, indopts
+          #plv8.execute "SELECT __drop_table($1,$2)",[table_schema , table_name]  
+          @__drop_table table_schema , table_name
 
 
   root.actn.funcs = new Funcs

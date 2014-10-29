@@ -1,10 +1,8 @@
-// global = (function() {
-//   return this;
-// }).call(null);
-
 (function(){
   
-  var root = this,
+  var 
+  
+  root = this,
   
   Actn = (function() {
     function Actn() {}
