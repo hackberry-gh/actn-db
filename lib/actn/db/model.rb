@@ -5,6 +5,8 @@ module Actn
   module DB
     class Model < Mod
         
+      PUBLIC = 'public'
+        
       self.table = "models"
       self.schema = "core" 
       
@@ -22,7 +24,7 @@ module Actn
       end
       
       def set_defaults
-        self.table_schema = :public
+        self.table_schema ||= PUBLIC
       end
       
      

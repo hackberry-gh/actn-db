@@ -11,12 +11,12 @@ module Actn
       end
       
       def self.[]table
-        self.tables[table] ||= new(table)
+        self.tables[table] ||= new(:public,table)
       end
       
       attr_accessor :table, :schema
       
-      def initialize schema = :public, table
+      def initialize schema, table
         self.table = table
         self.schema = schema
       end
@@ -41,7 +41,8 @@ module Actn
       
       def validate_and_upsert data
         sql = "SELECT __upsert($1,$2,__validate($3,$4))"
-        exec_prepared sql.parameterize.underscore, sql, [schema, table, table.classify, data.to_json]
+        # exec_prepared "#{sql.parameterize.underscore}_#{schema}_#{table}_#{data.keys.join('_')}", sql, [schema, table, table.classify, data.to_json]
+        exec_params sql, [schema, table, table.classify, data.to_json]
       end
 
       

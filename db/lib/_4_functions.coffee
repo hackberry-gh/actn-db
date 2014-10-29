@@ -135,7 +135,8 @@
       sql.push ")"
   
       sql = sql.join(" ")
-  
+      
+      plv8.execute("DROP INDEX IF EXISTS #{index_name}")
       plv8.execute(sql)
 
       return JSON.stringify(index_name)    
@@ -156,7 +157,11 @@
 
       [sql,params] = builder.build_select()
 
+      # plv8.elog(NOTICE,"BEFORE",sql,JSON.stringify(params))
+
       rows = plv8.execute(sql,params)
+      
+      # plv8.elog(NOTICE,"AFTER",JSON.stringify(rows))
 
       builder = null  
 
@@ -193,10 +198,12 @@
 
       # plan = plv8.prepare(sql, ['json','bool','text'])
 
-      # plv8.elog(NOTICE,sql,JSON.stringify(params))
+      # plv8.elog(NOTICE,"BEFORE",sql,JSON.stringify(params))
 
       rows = plv8.execute(sql, params)
-
+      
+      # plv8.elog(NOTICE,"AFTER",JSON.stringify(rows))
+      
       result = _.pluck(rows,'data')
 
       result = result[0] if result.length is 1
@@ -214,7 +221,12 @@
 
       [sql,params] = builder.build_update(_data)
 
+      # plv8.elog(NOTICE,"BEFORE",sql,JSON.stringify(params))
+      #
       rows = plv8.execute(sql,params)
+      #
+      # plv8.elog(NOTICE,"AFTER",JSON.stringify(rows))
+      
       result = _.pluck(rows,'data')
       result = result[0] if result.length is 1  
 
@@ -231,7 +243,8 @@
 
       # plv8.elog(NOTICE,"DELETE",sql,params)
 
-      rows = plv8.execute(sql,params)
+      plan = plv8.prepare(sql)
+      rows  = plan.execute(params)
       result = _.pluck(rows,'data')
       result = result[0] if result.length is 1
 
@@ -266,7 +279,7 @@
         else if model.schema.unique_attributes?
           # plv8.elog(NOTICE,"MODELDEMOL",JSON.stringify(model))
     
-          _schema = if _name is "Model" then "core" else "public"
+          _schema = model.table_schema 
           _table = model.name.tableize()    
           __query = @__query #plv8.find_function("__query")
     

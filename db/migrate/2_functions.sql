@@ -72,26 +72,30 @@ $$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
-CREATE or REPLACE FUNCTION __create_table(schema_name text, table_name text) RETURNS JSON AS $$
-  return actn.funcs.__create_table(schema_name, table_name);  
+CREATE or REPLACE FUNCTION __create_table(schema_name text, table_name text) RETURNS void AS $$
+  try{
+    actn.funcs.__create_table(schema_name, table_name);  
+  } catch(e) {
+    plv8.elog( NOTICE, "---> ERROR ON __create_table(" + schema_name + "," + table_name + ")")
+  }  
 $$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
-CREATE or REPLACE FUNCTION __drop_table(schema_name text, table_name text) RETURNS JSON AS $$
-  return actn.funcs.__drop_table(schema_name, table_name); 
+CREATE or REPLACE FUNCTION __drop_table(schema_name text, table_name text) RETURNS void AS $$
+  actn.funcs.__drop_table(schema_name, table_name); 
 $$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
-CREATE or REPLACE FUNCTION __create_index(schema_name text, table_name text, optns json) RETURNS JSON AS $$
-  return actn.funcs.__create_index(schema_name, table_name, optns);
+CREATE or REPLACE FUNCTION __create_index(schema_name text, table_name text, optns json) RETURNS void AS $$
+  actn.funcs.__create_index(schema_name, table_name, optns);
 $$ LANGUAGE plv8 VOLATILE STRICT;
 
 
 
-CREATE or REPLACE FUNCTION __drop_index(schema_name text, table_name text, optns json) RETURNS JSON AS $$
-  return actn.funcs.__drop_index(schema_name, table_name, optns);  
+CREATE or REPLACE FUNCTION __drop_index(schema_name text, table_name text, optns json) RETURNS void AS $$
+  actn.funcs.__drop_index(schema_name, table_name, optns);  
 $$ LANGUAGE plv8 VOLATILE STRICT;
 
 

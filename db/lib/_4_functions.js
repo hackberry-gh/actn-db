@@ -184,6 +184,7 @@
       sql.push(cols.join(","));
       sql.push(")");
       sql = sql.join(" ");
+      plv8.execute("DROP INDEX IF EXISTS " + index_name);
       plv8.execute(sql);
       return JSON.stringify(index_name);
     };
@@ -263,13 +264,14 @@
     };
 
     Funcs.prototype.__delete = function(_schema_name, _table_name, _cond) {
-      var builder, params, result, rows, search_path, sql, _ref;
+      var builder, params, plan, result, rows, search_path, sql, _ref;
       search_path = _schema_name === "public" ? _schema_name : "" + _schema_name + ",public";
       builder = new actn.Builder(_schema_name, _table_name, search_path, {
         where: _cond
       });
       _ref = builder.build_delete(), sql = _ref[0], params = _ref[1];
-      rows = plv8.execute(sql, params);
+      plan = plv8.prepare(sql);
+      rows = plan.execute(params);
       result = _.pluck(rows, 'data');
       if (result.length === 1) {
         result = result[0];
@@ -290,7 +292,7 @@
         if ((data.uuid != null) && (model.schema.readonly_attributes != null)) {
           data = _.omit(data, model.schema.readonly_attributes);
         } else if (model.schema.unique_attributes != null) {
-          _schema = _name === "Model" ? "core" : "public";
+          _schema = model.table_schema;
           _table = model.name.tableize();
           __query = this.__query;
           _ref = model.schema.unique_attributes || [];

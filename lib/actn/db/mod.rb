@@ -73,7 +73,7 @@ module Actn
       
       end
       
-      self.schema = "public"
+      self.schema ||= "public"
       
       attr_accessor :attributes
       data_attr_accessor :uuid, :locale, :created_at, :updated_at

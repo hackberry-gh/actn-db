@@ -31,7 +31,7 @@ module Actn
         # puts "----"
         # puts model.inspect
         # puts "----"
-        puts model.errors.inspect
+        # puts model.errors.inspect
         assert model.persisted?
 
         assert_match /0/, Set['ModelName'.tableize].count

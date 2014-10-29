@@ -31,7 +31,10 @@ module Actn
       end
       
       def test_validate_and_upsert
-        mdata = Oj.dump({ name: "Supporter", schema: {
+        mdata = Oj.dump({ 
+          table_schema: "public",
+          name: "Supporter", 
+          schema: {
           type: 'object',
           id: "#supporter",
           title: "Supporter", 
@@ -42,7 +45,10 @@ module Actn
           required: ['city']
         }
         })
-        DB.exec_func(:upsert, 'core', 'models', mdata)
+        DB.exec_func(:delete, 'core', 'models', Oj.dump({name: "Supporter"})) rescue nil
+        
+        res = DB.exec_func(:upsert, 'core', 'models', mdata)
+        # puts res.inspect
 
         assert_match /errors/, Set['supporters'].validate_and_upsert(age: 12, name: random_str)
         assert_match /Belgium/, Set['supporters'].validate_and_upsert(age: 12, city: "Belgium", name: random_str)        
