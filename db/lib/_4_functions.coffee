@@ -159,10 +159,10 @@
 
       builder = null  
 
-      if _query?.select?.indexOf('COUNT') > -1
-        result = rows
-      else
+      if _query.select is "*" or _.isArray(_query.select)
         result = _.pluck(rows,'data')
+      else
+        result = rows
 
 
       return JSON.stringify(result)   

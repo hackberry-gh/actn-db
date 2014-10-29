@@ -20,17 +20,20 @@
       return "$" + (this.i += 1);
     };
 
+    Builder.prototype.make_distinct = function() {
+      return _.map(this.query.distinct.split(","), function(f) {
+        return "data->>'" + f + "' AS " + f;
+      }).join(", ");
+    };
+
     Builder.prototype.make_select = function() {
-      var _ref, _ref1;
-      if (((_ref = this.query) != null ? (_ref1 = _ref.select) != null ? _ref1.indexOf('COUNT') : void 0 : void 0) > -1) {
-        return this.query.select;
+      if (this.query.select === "*") {
+        return "data";
+      } else if (_.isArray(this.query.select)) {
+        this.params.push(this.query.select.join(","));
+        return "__select(data, " + (this.qm()) + ") as data";
       } else {
-        if (this.query.select === "*") {
-          return "data";
-        } else {
-          this.params.push(_.flatten([this.query.select]).join("."));
-          return "__select(data, " + (this.qm()) + ") as data";
-        }
+        return this.query.select;
       }
     };
 
@@ -47,18 +50,21 @@
           case 'AND':
           case '&':
           case '&&':
-            sql.push("(" + (make_where(subquery, 'AND')) + ")");
+            sql.push("(" + (this.make_where(subquery, 'AND')) + ")");
             break;
           case 'or':
           case 'OR':
           case '|':
           case '||':
-            sql.push("(" + (make_where(subquery, 'OR')) + ")");
+            sql.push("(" + (this.make_where(subquery, 'OR')) + ")");
             break;
           case 'not':
           case 'NOT':
           case '!':
-            sql.push("NOT (" + (make_where(subquery, 'AND')) + ")");
+            sql.push("NOT (" + (this.make_where(subquery, 'AND')) + ")");
+            break;
+          case 'raw':
+            sql.push(subquery);
             break;
           default:
             if (_.isArray(subquery)) {
@@ -88,8 +94,8 @@
 
     Builder.prototype.make_order_by = function() {
       var k, ord, str, v, _i, _len;
-      ord = this.query.order_by;
       str = [];
+      ord = this.query.order_by;
       if (_.isArray(ord)) {
         this.params.push(ord[0]);
         str.push("" + (this.plv8_key(ord[1])) + " " + (ord[1].toUpperCase()));
@@ -99,11 +105,34 @@
           this.params.push(v);
           str.push("" + (this.plv8_key(k)) + " " + (k.toUpperCase()));
         }
-      } else {
-        this.params.push(ord);
-        str.push(this.qm());
+      } else if (ord != null) {
+        str.push(ord);
       }
       return str.join(",");
+    };
+
+    Builder.prototype.make_group_by = function() {
+      var k, ord, str, v, _i, _len;
+      str = [];
+      ord = this.query.group_by;
+      if (this.query.distinct) {
+        str.push(_.map(this.query.distinct.split(","), function(f) {
+          return "data->>'" + f + "'";
+        }));
+      }
+      if (_.isArray(ord)) {
+        this.params.push(ord[0]);
+        str.push("" + (this.plv8_key(ord[1])) + " " + (ord[1].toUpperCase()));
+      } else if (_.isObject(ord)) {
+        for (v = _i = 0, _len = ord.length; _i < _len; v = ++_i) {
+          k = ord[v];
+          this.params.push(v);
+          str.push("" + (this.plv8_key(k)) + " " + (k.toUpperCase()));
+        }
+      } else if (ord != null) {
+        str.push(ord);
+      }
+      return _.flatten(str).join(",");
     };
 
     Builder.prototype.make_limit = function() {
@@ -120,12 +149,19 @@
       var sql;
       sql = [];
       sql.push("SET search_path TO " + this.search_path + ";");
-      sql.push("SELECT " + (this.make_select()) + " FROM " + this.schema_name + "." + this.table_name);
+      sql.push("SELECT");
+      if (this.query.distinct != null) {
+        sql.push("DISTINCT " + (this.make_distinct()) + ",");
+      }
+      sql.push("" + (this.make_select()) + " FROM " + this.schema_name + "." + this.table_name);
       if (!_.isEmpty(this.query.where)) {
         sql.push("WHERE " + (this.make_where(this.query.where)));
       }
+      if ((this.query.group_by != null) || (this.query.distinct != null)) {
+        sql.push("GROUP BY " + (this.make_group_by()));
+      }
       if (this.query.order_by != null) {
-        sql.push("ORDER BY " + (this.make_order()));
+        sql.push("ORDER BY " + (this.make_order_by()));
       }
       if (this.query.limit != null) {
         sql.push("LIMIT " + (this.make_limit()));

@@ -10,15 +10,19 @@
 
     qm: -> "$#{@i += 1}"
 
-    make_select: ->
-      if @query?.select?.indexOf('COUNT') > -1
-        @query.select
+    make_distinct: ->
+      _.map(@query.distinct.split(","),(f) -> "data->>'#{f}' AS #{f}").join(", ")
+
+    make_select: ->      
+      if @query.select is "*" 
+        "data"   
+        
+      else if _.isArray(@query.select)
+        @params.push @query.select.join(",")
+        "__select(data, #{@qm()}) as data"
+        
       else
-        if @query.select is "*" 
-          "data" 
-        else  
-          @params.push _.flatten([@query.select]).join(".")
-          "__select(data, #{@qm()}) as data" #::text
+        @query.select  
 
 
     make_where: (q, join_by = 'AND') ->
@@ -26,11 +30,13 @@
       for k, subquery of q
         switch k
           when 'and', 'AND', '&', '&&'
-            sql.push "(#{make_where(subquery, 'AND')})"
+            sql.push "(#{@make_where(subquery, 'AND')})"
           when  'or',  'OR', '|', '||'
-            sql.push "(#{make_where(subquery, 'OR')})"
+            sql.push "(#{@make_where(subquery, 'OR')})"
           when 'not', 'NOT', '!'
-            sql.push "NOT (#{make_where(subquery, 'AND')})"
+            sql.push "NOT (#{@make_where(subquery, 'AND')})"
+          when 'raw'
+            sql.push subquery  
           else
             if _.isArray(subquery)
               @params.push k
@@ -52,8 +58,8 @@
 
 
     make_order_by: () ->
-      ord = @query.order_by
       str = []
+      ord = @query.order_by
       if _.isArray(ord)
         @params.push ord[0]
         str.push "#{@plv8_key(ord[1])} #{ord[1].toUpperCase()}"
@@ -61,10 +67,27 @@
         for k,v in ord
           @params.push v
           str.push "#{@plv8_key(k)} #{k.toUpperCase()}"
-      else
-        @params.push ord
-        str.push @qm()
-      str.join(",")  
+      else if ord?
+        str.push ord
+      str.join(",")
+    
+    make_group_by: () ->
+      str = []
+      ord = @query.group_by
+      if @query.distinct
+        str.push _.map(@query.distinct.split(","),(f) -> "data->>'#{f}'")
+        
+      if _.isArray(ord)
+        @params.push ord[0]
+        str.push "#{@plv8_key(ord[1])} #{ord[1].toUpperCase()}"
+      else if _.isObject(ord)
+        for k,v in ord
+          @params.push v
+          str.push "#{@plv8_key(k)} #{k.toUpperCase()}"
+      else if ord?
+        str.push ord
+        
+      _.flatten(str).join(",")   
 
 
     make_limit: ->
@@ -80,11 +103,15 @@
     build_select: ->
       sql = []
       sql.push "SET search_path TO #{@search_path};"
-      sql.push "SELECT #{@make_select()} FROM #{@schema_name}.#{@table_name}"
+      sql.push "SELECT"
+      sql.push "DISTINCT #{@make_distinct()}," if @query.distinct?
+      sql.push "#{@make_select()} FROM #{@schema_name}.#{@table_name}"
       sql.push "WHERE #{@make_where(@query.where)}" unless _.isEmpty(@query.where)
-      sql.push "ORDER BY #{@make_order()}" if @query.order_by?
+      sql.push "GROUP BY #{@make_group_by()}" if @query.group_by? or @query.distinct?
+      sql.push "ORDER BY #{@make_order_by()}" if @query.order_by?       
       sql.push "LIMIT #{@make_limit()}" if @query.limit?
       sql.push "OFFSET #{@make_offset()}" if @query.offset?
+      # plv8.elog(NOTICE,"SELECT",sql.join("\n"),JSON.stringify(@params))
       [sql.join("\n"), @params]
 
     build_delete: ->
@@ -115,9 +142,9 @@
       sql.push "RETURNING data::json;"
       [sql.join("\n"), @params] 
 
-    plv8_key: (value) -> "#{@typecast(value,true)}(data, #{@qm()}::text)" #::text
+    plv8_key: (value) -> "#{@typecast(value,true)}(data, #{@qm()}::text)" # "data->>'#{value}'"
 
-    plv8_qm: (value) -> "#{@qm()}::#{@typecast(value)}"
+    plv8_qm: (value) -> "#{@qm()}::#{@typecast(value)}" 
   
     typecast: (value, is_func = false) ->
       type = if is_func then "__" else ""

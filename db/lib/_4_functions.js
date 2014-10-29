@@ -201,16 +201,16 @@
     };
 
     Funcs.prototype.__query = function(_schema_name, _table_name, _query) {
-      var builder, params, result, rows, search_path, sql, _ref, _ref1;
+      var builder, params, result, rows, search_path, sql, _ref;
       search_path = _schema_name === "public" ? _schema_name : "" + _schema_name + ", public";
       builder = new actn.Builder(_schema_name, _table_name, search_path, _query);
       _ref = builder.build_select(), sql = _ref[0], params = _ref[1];
       rows = plv8.execute(sql, params);
       builder = null;
-      if ((_query != null ? (_ref1 = _query.select) != null ? _ref1.indexOf('COUNT') : void 0 : void 0) > -1) {
-        result = rows;
-      } else {
+      if (_query.select === "*" || _.isArray(_query.select)) {
         result = _.pluck(rows, 'data');
+      } else {
+        result = rows;
       }
       return JSON.stringify(result);
     };

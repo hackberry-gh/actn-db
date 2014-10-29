@@ -13,10 +13,16 @@ module Actn
       before_create :classify_name
       before_update :classify_name      
       
+      before_validation :set_defaults
+      
       private
       
       def classify_name
         self.name = self.name.classify if self.name
+      end
+      
+      def set_defaults
+        self.table_schema = :public
       end
       
      

@@ -31,6 +31,14 @@ module Actn
         CODE
       end
       
+      [:query].each do |meth|
+        class_eval <<-CODE
+        def inspect_#{meth} *args
+          inspect_func :#{meth}, schema, table, *args.map(&:to_json)
+        end
+        CODE
+      end
+      
       def validate_and_upsert data
         sql = "SELECT __upsert($1,$2,__validate($3,$4))"
         exec_prepared sql.parameterize.underscore, sql, [schema, table, table.classify, data.to_json]

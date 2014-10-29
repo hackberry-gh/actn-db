@@ -22,13 +22,17 @@ module Actn
       
       Oj.default_options = { time_format: :ruby, mode: :compat }
     
+      def inspect_func func_name, *params
+        sql = "SELECT __#{func_name}(#{ (params.length-1).times.inject("$1"){ |m,i| "#{m},$#{ i + 2 }"} })"
+        [sql, params]
+      end
+    
       def exec_func func_name, *params
         sql = "SELECT __#{func_name}(#{ (params.length-1).times.inject("$1"){ |m,i| "#{m},$#{ i + 2 }"} })"
         exec_prepared sql.parameterize.underscore, sql, params
       end
     
       def exec_prepared statement, sql, params = []
-        
         pg.prepare statement, sql rescue ::PG::DuplicatePstatement
         
         begin          
