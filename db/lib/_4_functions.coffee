@@ -276,7 +276,7 @@
           # plv8.elog(NOTICE,"VALIDATE READONLY",JSON.stringify(data),JSON.stringify(model.schema.readonly_attributes))
 
     
-        else if model.schema.unique_attributes?
+        else if model.schema.unique_attributes? and not data.uuid?
           # plv8.elog(NOTICE,"MODELDEMOL",JSON.stringify(model))
     
           _schema = model.table_schema 

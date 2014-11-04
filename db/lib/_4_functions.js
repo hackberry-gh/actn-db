@@ -291,7 +291,7 @@
         errors = actn.jjv.validate(model.schema, data);
         if ((data.uuid != null) && (model.schema.readonly_attributes != null)) {
           data = _.omit(data, model.schema.readonly_attributes);
-        } else if (model.schema.unique_attributes != null) {
+        } else if ((model.schema.unique_attributes != null) && (data.uuid == null)) {
           _schema = model.table_schema;
           _table = model.name.tableize();
           __query = this.__query;

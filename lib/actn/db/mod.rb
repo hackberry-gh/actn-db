@@ -167,6 +167,7 @@ module Actn
           JsonSchemaError.new(result).errors.each do |field,err|
             errors.add(field,err.keys.flatten.join(","))            
           end
+          return false
         end
         self
       end
