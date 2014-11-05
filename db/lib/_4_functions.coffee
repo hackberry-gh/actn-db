@@ -186,8 +186,11 @@
         query =  { where: { uuid: data.uuid } }
   
         builder = new actn.Builder(_schema_name, _table_name, search_path, query )    
-
-        [sql,params] = builder.build_update(data)
+        
+        sync = _data.__sync || true          
+        delete _data.__sync
+        
+        [sql,params] = builder.build_update(data,sync)
 
       else
   
@@ -219,7 +222,10 @@
 
       builder = new actn.Builder(_schema_name, _table_name, search_path, {where: _cond})
 
-      [sql,params] = builder.build_update(_data)
+      sync = _data.__sync || true          
+      delete _data.__sync
+        
+      [sql,params] = builder.build_update(_data, sync)
 
       # plv8.elog(NOTICE,"BEFORE",sql,JSON.stringify(params))
       #
