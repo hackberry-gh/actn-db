@@ -217,7 +217,7 @@
     };
 
     Funcs.prototype.__upsert = function(_schema_name, _table_name, _data) {
-      var builder, data, params, query, result, rows, search_path, sql, _ref, _ref1;
+      var builder, data, params, query, result, rows, search_path, sql, sync, _ref, _ref1;
       if (_data.errors != null) {
         return JSON.stringify(_data);
       }
@@ -230,7 +230,9 @@
           }
         };
         builder = new actn.Builder(_schema_name, _table_name, search_path, query);
-        _ref = builder.build_update(data), sql = _ref[0], params = _ref[1];
+        sync = _data.__sync || true;
+        delete _data.__sync;
+        _ref = builder.build_update(data, sync), sql = _ref[0], params = _ref[1];
       } else {
         builder = new actn.Builder(_schema_name, _table_name, search_path, {});
         _ref1 = builder.build_insert(data), sql = _ref1[0], params = _ref1[1];
@@ -245,7 +247,7 @@
     };
 
     Funcs.prototype.__update = function(_schema_name, _table_name, _data, _cond) {
-      var builder, params, result, rows, search_path, sql, _ref;
+      var builder, params, result, rows, search_path, sql, sync, _ref;
       if (_data.errors != null) {
         return JSON.stringify(_data);
       }
@@ -253,7 +255,9 @@
       builder = new actn.Builder(_schema_name, _table_name, search_path, {
         where: _cond
       });
-      _ref = builder.build_update(_data), sql = _ref[0], params = _ref[1];
+      sync = _data.__sync || true;
+      delete _data.__sync;
+      _ref = builder.build_update(_data, sync), sql = _ref[0], params = _ref[1];
       rows = plv8.execute(sql, params);
       result = _.pluck(rows, 'data');
       if (result.length === 1) {
